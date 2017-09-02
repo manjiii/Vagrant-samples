@@ -1,22 +1,26 @@
 #!/bin/bash
 
-echo "------------------------------------------------"
-docker ps
-echo "------------------------------------------------"
+DOCKERS=`docker ps --format "{{.Names}}"`
+DOCKERS_ARRAY=(`echo $DOCKERS`)
 
 function selectContainer(){
 
-  cont_count=`docker ps -q | wc -l`
+  cont_count=${#DOCKERS_ARRAY[@]}
 
   if [ $cont_count = 0  ]; then
-    echo "There are no container"
+    echo "There are no container..."
     exit 0;
   fi
 
-  echo "Please choice container and input it's line number"
+  echo "------------------------------------------------"
+  for i in ${!DOCKERS_ARRAY[@]}; do
+    echo "$i) ${DOCKERS_ARRAY[$i]}"
+  done
+  echo "------------------------------------------------"
+  echo "Please choice container"
 
   read input
-  
+
   if [ -z $input ]; then
     echo ""
     selectContainer
@@ -25,26 +29,20 @@ function selectContainer(){
   check_num=`echo "${input}" | awk '/[^0-9]/ {print}'`
   if [ ! -z "$check_num" ]; then
     echo ""
-    echo "ERROR: Please input line number."
-    
+    echo "ERROR: Please input container's number."
+
     selectContainer
   fi
 
   if [ $input -gt $cont_count ]; then
     echo ""
-    echo "ERROR: There are $cont_count container(s)."
+    echo "ERROR: There are $cont_count container."
     selectContainer
   fi
 }
 
 selectContainer
 
-con_id=`docker ps -q | awk -v n=$input 'NR==n'`
-if [ -n "$con_id" ]; then
-  echo "login to continer. name: `docker ps | awk -v n=$(($input+1)) 'NR==n' | awk '{print $2}'`"
-  docker exec -it $con_id bash
-  exit 0
-else
-  echo "cannot find countainer...."
-  exit 1
-fi
+echo "login to ${DOCKERS_ARRAY[$input]}..."
+docker exec -it ${DOCKERS_ARRAY[$input]} bash
+exit 0
