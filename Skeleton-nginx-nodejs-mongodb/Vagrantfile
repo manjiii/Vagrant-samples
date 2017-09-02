@@ -43,7 +43,7 @@ Vagrant.configure("2") do |config|
     # npm install
     d.run "npm-install", image:"manjiii/node", 
       args: "-v " + settings['node']['src']['guest'] + ":" + settings['node']['src']['docker'] + "\
-      -w '" + settings['node']['src']['docker'] + "' --rm", 
+      -w '" + settings['node']['src']['docker'] + "'", 
       cmd:"npm install", daemonize:false, restart: false
     # run nodejs express
     d.run "nodejs", image: "manjiii/node", 
