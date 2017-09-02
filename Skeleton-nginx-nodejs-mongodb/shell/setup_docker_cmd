@@ -1,0 +1,13 @@
+su vagrant
+cd
+chmod -R 744 /home/vagrant/docker_cmd_shell/*.sh
+cat >> /home/vagrant/.bashrc << EOS 
+alias dcex="/home/vagrant/docker_cmd_shell/docker_exe.sh"
+alias dcrmall="/home/vagrant/docker_cmd_shell/docker_rm_all.sh"
+alias dcrmiall="/home/vagrant/docker_cmd_shell/docker_rmi_all.sh"
+alias dcpsa="docker ps -a"
+alias dcim="docker images"
+alias dcima="docker images -a"
+alias dclog="docker logs"
+EOS
+

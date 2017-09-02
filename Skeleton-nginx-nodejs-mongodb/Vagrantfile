@@ -1,0 +1,159 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+
+# before vagrant up, install following plugins
+#
+# vagrant plugin install vagrant-gatling-rsync
+# vagrant plugin install vagrant-vbguest
+
+# read variable file
+require 'yaml'
+settings = YAML.load_file 'settings/localsetting.yaml'
+
+
+Vagrant.configure("2") do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://vagrantcloud.com/search.
+  config.vm.box = settings['vm']['os'] 
+  config.vm.provision "docker" do |d|
+
+    # data container
+    d.run "busybox", args: "--name storage -v /vagrant/mongodb/db:/data/db:rw", 
+                            daemonize:false, restart: false
+
+    # nginx container
+    d.build_image "/vagrant/dockers/nginx", args: "-t manjiii/nginx"
+    d.run "nginx", image: "manjiii/nginx", 
+      args: "-v " + settings['nginx']['conf']['guest']  + ":" + settings['nginx']['conf']['docker'] + ":ro \
+             -v " + settings['nginx']['www']['guest']  + ":" + settings['nginx']['www']['docker'] + ":rw \
+             -v " + settings['nginx']['log']['guest'] + ":" + settings['nginx']['log']['docker'] + ":rw \
+             -p 80:80"
+
+    # node container
+    d.build_image "/vagrant/dockers/node", args: "-t manjiii/node"
+    # npm install
+    d.run "npm-install", image:"manjiii/node", 
+      args: "-v " + settings['node']['src']['guest'] + ":" + settings['node']['src']['docker'] + "\
+      -w '" + settings['node']['src']['docker'] + "' --rm", 
+      cmd:"npm install", daemonize:false, restart: false
+    # run nodejs express
+    d.run "nodejs", image: "manjiii/node", 
+      args: "-v " + settings['node']['src']['guest'] + ":" + settings['node']['src']['docker'] + " \
+            -v " + settings['node']['log']['guest'] + ":" + settings['node']['log']['docker'] + " \
+            -p 8080:8080 \
+            -p 9229:9229 \
+            -w '" + settings['node']['src']['docker'] + "'", 
+      cmd: "bash -c 'npm config set log_dir " + settings['node']['log']['docker'] +  "&& npm start'"
+    
+    # mongodb dontainer
+    d.build_image "/vagrant/dockers/mongodb", args: "-t manjiii/mongodb"
+    # run mongo
+    d.run "mongodb", image: "manjiii/mongodb", 
+      args: " -p 27017:27017 --volumes-from storage:rw \
+              -v " + settings['mongodb']['log']['guest'] + ":" + settings['mongodb']['log']['docker'],
+      cmd: "bash -c 'chmod 777 -R /var/log/mongodb && mongod --logpath=" + settings['mongodb']['log']['docker'] + "/mongodb.log --logappend'"
+  end
+
+  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  # config.vm.box_check_update = false
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  # NOTE: This will enable public access to the opened port
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine and only allow access
+  # via 127.0.0.1 to disable public access
+  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  config.vm.network "private_network", ip: settings['vm']['ip']
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+
+  # disable dafault sync
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  # sync data file
+  # config.vm.synced_folder "./dockers/data", "/vagrant/dockers/data"
+
+  # synd docker files
+  config.vm.synced_folder "./dockers", "/vagrant/dockers"
+
+  # sync data for nginx
+  config.vm.synced_folder settings['nginx']['conf']['host'], settings['nginx']['conf']['guest']
+  config.vm.synced_folder settings['nginx']['www']['host'], settings['nginx']['www']['guest'], type: "rsync"
+  # log of nginx
+  config.vm.synced_folder settings['nginx']['log']['host'], settings['nginx']['log']['guest']
+
+  # sync data for node
+  config.vm.synced_folder settings['node']['src']['host'], settings['node']['src']['guest'] ,type: "rsync", rsync__exclude: "node_modules"
+  # log of node
+  config.vm.synced_folder settings['node']['log']['host'], settings['node']['log']['guest']
+
+  # log of mongodb
+  config.vm.synced_folder settings['mongodb']['log']['host'], settings['mongodb']['log']['guest']
+
+  # vagrant-gatling-rsync settings
+  config.gatling.latency = 2.0
+  config.gatling.time_format = "%H:%M:%S"
+  config.gatling.rsync_on_startup = true
+
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+  # config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+  #   vb.memory = "1024"
+  # end
+  #
+  # View the documentation for the provider you are using for more
+  # information on available options.
+
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  # config.vm.provision "shell", inline: <<-SHELL
+  #   apt-get update
+  #   apt-get install -y apache2
+  # SHELL
+
+  # set timezone to JST
+  config.vm.provision "shell", inline: <<-SHELL
+     timedatectl set-timezone Asia/Tokyo
+  SHELL
+
+  # for docker custom commands
+  # copy files
+  config.vm.provision "file", source: "shell", destination: "~/docker_cmd_shell"
+  # chmod and alias
+  config.vm.provision "shell", path: "shell/setup_docker_cmd"
+
+end

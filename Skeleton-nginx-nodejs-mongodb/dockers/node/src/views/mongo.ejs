@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
+        crossorigin="anonymous">
+    <meta charset="utf-8">
+    <title>
+        <%=title %>
+    </title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>
+            <%=title %>
+        </h1>
+        <% if (message) { %>
+            <h5>message:
+                <%= message %>
+            </h5>
+        <% } %>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>名前</th>
+                    <th>年齢</th>
+                    <th>性別</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(function (user, key) { %>
+                    <tr>
+                        <th>
+                            <%= key %>
+                        </th>
+                        <td>
+                            <%= user.name %>
+                        </td>
+                        <td>
+                            <%= user.age %>
+                        </td>
+                        <td>
+                            <%= user.sex %>
+                        </td>
+                    </tr>
+                    
+                    <% }); %>
+            </tbody>
+        </table>
+
+    </div>
+</body>
+
+</html>

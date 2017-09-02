@@ -1,0 +1,19 @@
+{
+  "name": "manjii_app",
+  "version": "0.0.1",
+  "description": "Node.js on Docker",
+  "author": "Manjiii <manjix3@gmail.com>",
+  "main": "server.js",
+  "scripts": {
+    "start": "NODE_ENV=development node_modules/forever/bin/forever -w  -l /var/log/node/forever.log -c 'node --inspect=0.0.0.0:9229' server.js"
+  },
+  "dependencies": {
+    "express": "^4.13.3",
+    "body-parser": "1.17.2",
+    "ejs":"2.5.7",
+    "cookie-parser": "1.4.*",
+    "forever":"0.15.*",
+    "log4js":"^2.3.3",
+    "mongodb": "2.2"
+  }
+}
