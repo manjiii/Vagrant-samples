@@ -4,7 +4,7 @@ var COL = 'manjiii_clctn';
 
 const url = require('url');
 var MongoClient = require("mongodb").MongoClient;
-var mongoUrl = 'mongodb://192.168.33.10:27017/manjiii_db';
+var mongoUrl = 'mongodb://mongodb:27017/manjiii_db';
 var title = 'mongo db';
 
 exports.index = (req, res) => {
