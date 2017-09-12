@@ -18,10 +18,11 @@ services:
   node_app:
     image: node:7.10.1
     container_name: node_app
+    depends_on:
+      - "mongodb"
     ports:
       - "8080:8080"
       - "9229:9229"
-
     volumes:
       - /vagrant/dockers/node/src:/var/node/src
       - /var/log/dockers/node/log:/var/log/node
