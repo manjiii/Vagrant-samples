@@ -6,7 +6,7 @@
             "request": "attach",
             "name": "Attach to Process",
             "port": 9229,
-            "address": "192.168.33.10",
+            "address": "192.168.33.20",
             "localRoot": "${workspaceRoot}",
             "remoteRoot": "/var/node/src"
         }

@@ -9,47 +9,38 @@ services:
     ports:
       - "80:80"
     volumes:
-      - /var/dockers/nginx/conf.d:/etc/nginx/conf.d
-      - /var/dockers/nginx/www:/var/nginx/www
-      - /var/dockers/nginx/log:/var/log/nginx
+      - /vagrant/dockers/nginx/conf.d:/etc/nginx/conf.d
+      - /vagrant/dockers/nginx/www:/var/nginx/www
+      - /var/log/dockers/nginx/log:/var/log/nginx
     networks:
       - app_network
-
-  node_npm_install:
-    image: node:7.10.1
-    container_name: npm_install
-    volumes:
-      - /var/dockers/node/src:/var/node/src
-    working_dir: /var/node/src
-    command: "npm install"
 
   node_app:
     image: node:7.10.1
-    container_name: node
-    depends_on:
-      - "node_npm_install"
-      - "mongo_db"
+    container_name: node_app
     ports:
       - "8080:8080"
+      - "9229:9229"
+
     volumes:
-      - /var/dockers/node/src:/var/node/src
-      - /var/dockers/node/log:/var/log/node
+      - /vagrant/dockers/node/src:/var/node/src
+      - /var/log/dockers/node/log:/var/log/node
     working_dir: /var/node/src
     networks:
       - app_network
-    command: "bash -c 'npm config set log_dir /var/log/node && npm start'"
+    command: "bash -c 'npm install && npm config set log_dir /var/log/node && npm start'"
 
-  mongo_db:
+  mongodb:
     image: mongo:3.4.7
     container_name: mongodb
     ports:
       - "27017:27017"
     volumes:
       - datastrage:/data/db
-      - /var/dockers/mongodb/log:/var/log/mongodb
+      - /var/log/dockers/mongodb/log:/var/log/mongodb
     networks:
       - app_network
-    command: "mongod"
+    command: "bash -c 'mongod --logpath=/var/log/mongodb/mongodb.log --logappend'"
 
 volumes:
   datastrage:
