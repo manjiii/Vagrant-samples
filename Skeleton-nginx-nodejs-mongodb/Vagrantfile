@@ -22,11 +22,14 @@ end
 
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
+  config.vm.provider "virtualbox" do |v|
+    v.name = "manjiii_vm"
+  end
 
   config.vm.network "private_network", ip: "192.168.33.20"
   
   config.vm.synced_folder ".", "/vagrant", type: "rsync", 
-  rsync__exclude: [ '.git*', 'node_modules*'  ]
+  rsync__exclude: [ '.git*', 'node_modules*', '.log'  ]
 
   config.vm.provision :docker
   config.vm.provision :docker_compose, yml: ["/vagrant/docker-compose.yml"], rebuild: true, project_name: "manjiii_nnm_project", run: "always"

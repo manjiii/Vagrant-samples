@@ -11,7 +11,7 @@ services:
     volumes:
       - /vagrant/dockers/nginx/conf.d:/etc/nginx/conf.d
       - /vagrant/dockers/nginx/www:/var/nginx/www
-      - /var/log/dockers/nginx/log:/var/log/nginx
+      - /vagrant/dockers/nginx/log:/var/log/nginx
     networks:
       - app_network
 
@@ -25,7 +25,7 @@ services:
       - "9229:9229"
     volumes:
       - /vagrant/dockers/node/src:/var/node/src
-      - /var/log/dockers/node/log:/var/log/node
+      - /vagrant/dockers/node/log:/var/log/node
     working_dir: /var/node/src
     networks:
       - app_network
@@ -38,7 +38,8 @@ services:
       - "27017:27017"
     volumes:
       - datastrage:/data/db
-      - /var/log/dockers/mongodb/log:/var/log/mongodb
+      - /vagrant/dockers/mongodb/tmp:/var/tmp
+      - /vagrant/dockers/mongodb/log:/var/log/mongodb
     networks:
       - app_network
     command: "bash -c 'mongod --logpath=/var/log/mongodb/mongodb.log --logappend'"
