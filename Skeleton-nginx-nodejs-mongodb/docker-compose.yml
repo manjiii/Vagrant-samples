@@ -16,7 +16,7 @@ services:
       - app_network
 
   node_app:
-    image: node:7.10.1
+    image: node:8.5.0
     container_name: node_app
     depends_on:
       - "mongodb"
@@ -29,7 +29,7 @@ services:
     working_dir: /var/node/src
     networks:
       - app_network
-    command: "bash -c 'npm install && npm config set log_dir /var/log/node && npm start'"
+    command: "bash -c 'npm install && npm start'"
 
   mongodb:
     image: mongo:3.4.7

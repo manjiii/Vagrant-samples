@@ -1,5 +1,5 @@
 var log4js = require('log4js');
-var log_dir = process.env.npm_config_log_dir;
+var log_dir = process.env.NODE_LOG_DIR;
 log4js.configure({
   appenders: {
     everything: { type: 'file', filename: log_dir + '/node-express.log' }
@@ -8,6 +8,7 @@ log4js.configure({
     default: { appenders: ['everything'], level: 'debug' }
   }
 });
+
 logger = log4js.getLogger();
 
 module.exports = logger;

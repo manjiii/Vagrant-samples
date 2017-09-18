@@ -5,7 +5,7 @@
   "author": "Manjiii <manjix3@gmail.com>",
   "main": "server.js",
   "scripts": {
-    "start": "NODE_ENV=development node_modules/forever/bin/forever -w  -l /var/log/node/forever.log -c 'node --inspect=0.0.0.0:9229' server.js"
+    "start": "NODE_ENV=development NODE_LOG_DIR=/var/log/node node_modules/forever/bin/forever -w -a -o /var/log/node/forever.log -e /var/log/node/forever.log -c 'node --inspect=0.0.0.0:9229' server.js"
   },
   "dependencies": {
     "express": "4.13.3",
